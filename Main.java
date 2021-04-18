@@ -30,18 +30,17 @@ class Main {
      * @return File object from the filename the user entered
      */
     public static File promptFile() {
-        // Scanner in = new Scanner(System.in);
-        // System.out.print("Enter a filename for input file: ");
-        // String fileName = in.nextLine();
-        // File lecturesFile = new File(fileName);
+        Scanner in = new Scanner(System.in);
+        System.out.print("Enter a filename for input file: ");
+        String fileName = in.nextLine();
+        File lecturesFile = new File(fileName);
         
-        // while(!lecturesFile.exists()){
-        //     System.out.print("Invalid file name! Try again: ");
-        //     fileName = in.nextLine();    
-        //     lecturesFile = new File(fileName);
-        // }
-        // in.close();
-        File lecturesFile = new File("sample_input.txt");
+        while(!lecturesFile.exists()){
+            System.out.print("Invalid file name! Try again: ");
+            fileName = in.nextLine();    
+            lecturesFile = new File(fileName);
+        }
+        in.close();
         return lecturesFile;
     }
 
