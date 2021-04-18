@@ -19,6 +19,7 @@ class Main {
         try {
             knap.parseFile(inputFile);
             knap.runAlgorithm();
+            knap.computeOptimal();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -75,24 +76,45 @@ class Knapsack {
     }
 
     public void runAlgorithm() {
-        // this.memTab.setItem(2, 3, 7);
+        System.out.println("\nSolving knapsack weight capacity " + this.getMaxWeight() + ", with " + Integer.toString(this.getItems().size() - 1) + " items");
         System.out.println("\n");
         for (int item = 0; item < this.getItems().size(); item++) {
             for (int weight = 0; weight <= this.getMaxWeight(); weight++) {
                 if (item == 0) {
-                    this.memTab.setItem(weight, item, 0);
+                    this.memTab.setItem(weight, item, new MemItem(0, false));
                 } else if(this.getItems().get(item).getWeight() > weight) {
-                    this.memTab.setItem(weight, item, this.memTab.getItem(weight, item - 1));
+                    this.memTab.setItem(weight, item, new MemItem(this.memTab.getItem(weight, item - 1).getVal(), false));
                 } else {
-                    this.memTab.setItem(weight, item, Math.max(this.memTab.getItem(weight, item - 1), 
-                                                                this.getItems().get(item).getValue() + this.memTab.getItem(weight - this.getItems().get(item).getWeight(), item - 1)));
+                    this.memTab.setItem(weight, item, new MemItem(Math.max(this.memTab.getItem(weight, item - 1).getVal(), 
+                                                                this.getItems().get(item).getValue() + this.memTab.getItem(weight - this.getItems().get(item).getWeight(), item - 1).getVal()), true));
                 }
             }
             System.out.println("Memoization table, Row " + item + " completed");
             System.out.println(this.memTab);
         }
+    }
 
-        System.out.println('x');;
+    public void computeOptimal() {
+        ArrayList<Item> optimal = new ArrayList<Item>();
+        int numItems = this.getItems().size() - 1;
+        int maxWeight = this.getMaxWeight();
+        while (numItems > 0 && maxWeight > 0) {
+            if (this.memTab.getItem(maxWeight, numItems).getVal() > this.memTab.getItem(maxWeight, numItems - 1).getVal()){
+                optimal.add(this.items.get(numItems));
+                maxWeight -= this.items.get(numItems).getWeight();
+            } 
+            numItems -= 1;
+        }
+
+        String contentsString = "";
+        int optimalVal = 0;
+
+        for (int i = 0; i < optimal.size(); i++) {
+            contentsString += optimal.get(i) + "\n";
+            optimalVal += optimal.get(i).getValue();
+        }
+        System.out.println("Knapsack with weight capacity " + this.getMaxWeight() + " has optimal value: " + optimalVal);
+        System.out.println("\nKnapsack contains: \n" + contentsString);
     }
 
     public int getMaxWeight() {
@@ -137,31 +159,31 @@ class Item {
 
     @Override
     public String toString() {
-        return "Item " + getIndex() + "(Value=" + getValue() + 
+        return "Item " + getIndex() + " (Value=" + getValue() + 
                 ", Weight=" + getWeight() + ")";
     }
 
 }
 
 class MemoizationTable {
-    ArrayList<ArrayList<Integer>> table;
+    ArrayList<ArrayList<MemItem>> table;
     
     MemoizationTable(int maxWeight, int numItems) {
-        this.table = new ArrayList<ArrayList<Integer>>();
+        this.table = new ArrayList<ArrayList<MemItem>>();
         for (int weight = 0; weight <= maxWeight; weight++) {
-            ArrayList<Integer> temp = new ArrayList<>();
+            ArrayList<MemItem> temp = new ArrayList<>();
             for (int item = 0; item <= numItems; item++) {
-                temp.add(-1);
+                temp.add(new MemItem(-1, false));
             }
             this.table.add(temp);
         }
     }
 
-    void setItem(int weight, int item, int value) {
+    void setItem(int weight, int item, MemItem value) {
         this.table.get(weight).set(item, value);
     }
 
-    int getItem(int weight, int item) {
+    MemItem getItem(int weight, int item) {
         return this.table.get(weight).get(item);
     }
 
@@ -187,4 +209,34 @@ class MemoizationTable {
         return tableString;
     }
 
+}
+
+class MemItem { 
+    int val;
+    Boolean include; 
+
+
+    public MemItem(int val, Boolean include) {
+        this.val = val;
+        this.include = include;
+    }
+
+    public int getVal() {
+        return this.val;
+    }
+
+    public Boolean isInclude() {
+        return this.include;
+    }
+
+    public Boolean getInclude() {
+        return this.include;
+    }
+
+
+    @Override
+    public String toString() {
+        return Integer.toString(getVal());
+    }
+    
 }
