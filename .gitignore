@@ -1,5 +1,7 @@
 # Editor
 .vs
+.py
+.out
 
 # Compiled class file
 *.class
